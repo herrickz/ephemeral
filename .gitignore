@@ -1,0 +1,9 @@
+# ignores following folders
+bin/
+build/
+out/
+
+.DS_Store
+
+.vscode/
+.vs/
