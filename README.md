@@ -1,19 +1,20 @@
 
-# 2D Side Scroller
+# Ephemeral
 
-1. [x] Get physics based jumping working
-2. [x] Text rendering for game score
-3. [x] Draw lines between objects
-4. [x] Create level
-5. [x] Enemies that move back and forth
-6. [x] Comment and refactor everything to make it look consistent
-7. [x] Logger implementation
-8. [x] Convert things to be unique_ptrs
-9. [x] Audio
-10. [ ] Move camera out of TexturedSquare.cpp
-11. [ ] Audio dynamic volume levels
+A 2D / 3D Game Engine. (Mac & Windows)
 
+![ephemeral-screenshot](https://github.com/user-attachments/assets/3c06a577-6a29-45a4-b259-f20f7ce44aab)
 
-```
-ffplay -f s16le -ar 44100 -ch_layout stereo -i full.pc
-```
+## Features
+
+- OpenGL rendering using GLFW Windowing
+- Texture loading in multiple formats (.jpg, .png, etc.)
+- Multi-Channel audio with .mp3 files with dynamic volume control for each channel
+- Euclidian camera implementation
+- Text Rendering
+
+## Notes
+
+- The base example implementation is a 2D sidescroller that loads a basic level with background music and effect sounds.
+- Most of this project was taken from [LearnOpenGL](https://github.com/JoeyDeVries/LearnOpenGL)
+    - This guy is legendary
