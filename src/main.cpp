@@ -12,6 +12,7 @@
 #include <ephemeral/GameManager.h>
 #include <ephemeral/AudioManager.h>
 #include <ephemeral/Logger.h>
+#include <ephemeral/InputManager.h>
 
 #include <iostream>
 #include <memory>
@@ -30,14 +31,23 @@ std::ostream& operator<< (std::ostream& stream, const TexturedSquare& square) {
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow *window);
 void drawLines(glm::vec3 squarePosition, Shader &lineShader);
+void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 
 Camera camera;
 std::unique_ptr<Player> player(std::make_unique<Player>(camera));
 
 float deltaTime = 0.0f;
 
-int main()
-{
+int main(int argc, char* argv[])
+{   
+    std::string baseExecutablePath = "";
+
+    if (argc == 2) {
+        baseExecutablePath = argv[1];
+        baseExecutablePath += "/";
+    }
+
+    LOG_I("Base executable path: %s", baseExecutablePath.c_str());
 
     // glfw: initialize and configure
     // ------------------------------
@@ -59,6 +69,7 @@ int main()
     }
     glfwMakeContextCurrent(window);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+    glfwSetCursorPosCallback(window, mouse_callback);
 
     // glad: load all OpenGL function pointers
     // ---------------------------------------
@@ -69,16 +80,16 @@ int main()
     }
 
     // Initialize all textures
-    Texture brickTexture("resources/textures/bricks2.jpg");
-    Texture playerTexture("resources/textures/matrix.jpg");
-    Texture coinTexture("resources/textures/awesomeface.png");
-    Texture enemyTexture("resources/textures/enemy.png");
+    Texture brickTexture(baseExecutablePath + "resources/textures/bricks2.jpg");
+    Texture playerTexture(baseExecutablePath + "resources/textures/matrix.jpg");
+    Texture coinTexture(baseExecutablePath + "resources/textures/awesomeface.png");
+    Texture enemyTexture(baseExecutablePath + "resources/textures/enemy.png");
 
-    TextRender textRender("resources/fonts/Antonio-Regular.ttf");
+    TextRender textRender(baseExecutablePath + "resources/fonts/Antonio-Regular.ttf");
 
     // Initialize all shaders
-    Shader texturedShader("resources/shaders/shader.vs", "resources/shaders/shader.fs");
-    Shader lineShader("resources/shaders/line.vs", "resources/shaders/line.fs");
+    Shader texturedShader(baseExecutablePath + "resources/shaders/shader.vs", baseExecutablePath + "resources/shaders/shader.fs");
+    Shader lineShader(baseExecutablePath + "resources/shaders/line.vs", baseExecutablePath + "resources/shaders/line.fs");
 
     // Create all the squares using a cube position vector
     std::vector<std::unique_ptr<TexturedSquare>> squares;
@@ -86,7 +97,7 @@ int main()
 
     LevelLoader levelLoader;
 
-    AudioManager::GetInstance().Play("resources/audio/breakout.mp3", 0);
+    AudioManager::GetInstance().Play(baseExecutablePath + "resources/audio/breakout.mp3", 0);
 
     if(!levelLoader.Load(player, squares, camera)) {
         LOG_F("Could not load level");
@@ -101,8 +112,13 @@ int main()
     glEnable(GL_MULTISAMPLE);
 
     std::string framesPerSecond = "";
-    glm::vec3 squarePosition = squares[0]->GetPosition();
 
+    glm::vec3 squarePosition = { 0.0, 0.0, 0.0 };
+    
+    if (squares.size() > 0) {
+        squarePosition = squares[0]->GetPosition();
+    }
+    
     float lastShownFps = 0.0f;
     float lastFrameTime = glfwGetTime();
 
@@ -208,6 +224,12 @@ void drawLines(glm::vec3 squarePosition, Shader &lineShader) {
     line2.Draw(lineShader);
     line3.Draw(lineShader);
     line4.Draw(lineShader);
+}
+
+void mouse_callback(GLFWwindow* window, double xPosition, double yPosition) {
+
+    InputManager::SetMouse(xPosition, yPosition);
+    
 }
 
 // process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly

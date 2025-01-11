@@ -96,6 +96,9 @@ set(SOURCE
   "src/ephemeral/LevelLoader.cpp"
   "src/ephemeral/GameManager.cpp"
   "src/ephemeral/AudioManager.cpp"
+  "src/ephemeral/objects/GameObject.cpp"
+  "src/ephemeral/objects/Cube.cpp"
+  "src/ephemeral/InputManager.cpp"
 )
 
 add_executable(${NAME} ${SOURCE})
