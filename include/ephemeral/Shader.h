@@ -19,7 +19,7 @@ public:
 
     void Use();
 
-    uint32_t GetShaderProgramId();
+    uint32_t GetShaderProgramId() const;
 
 private:
 

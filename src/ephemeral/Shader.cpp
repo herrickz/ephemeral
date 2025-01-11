@@ -90,6 +90,6 @@ void Shader::Use() {
     glUseProgram(mShaderProgramId);
 }
 
-uint32_t Shader::GetShaderProgramId() {
+uint32_t Shader::GetShaderProgramId() const {
     return mShaderProgramId;
 }

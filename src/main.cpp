@@ -13,6 +13,7 @@
 #include <ephemeral/AudioManager.h>
 #include <ephemeral/Logger.h>
 #include <ephemeral/InputManager.h>
+#include <ephemeral/objects/Cube.h>
 
 #include <iostream>
 #include <memory>
@@ -89,6 +90,7 @@ int main(int argc, char* argv[])
 
     // Initialize all shaders
     Shader texturedShader(baseExecutablePath + "resources/shaders/shader.vs", baseExecutablePath + "resources/shaders/shader.fs");
+    Shader regularShader(baseExecutablePath + "resources/shaders/shader.vs", baseExecutablePath + "resources/shaders/shader.fs");
     Shader lineShader(baseExecutablePath + "resources/shaders/line.vs", baseExecutablePath + "resources/shaders/line.fs");
 
     // Create all the squares using a cube position vector
@@ -96,6 +98,8 @@ int main(int argc, char* argv[])
     std::vector<glm::vec3> cubePositions;
 
     LevelLoader levelLoader;
+
+    Cube cube({ 0.0f, 0.0f, 0.0f }, { 0.5f, 0.5f, 0.5f, 1.0f });
 
     AudioManager::GetInstance().Play(baseExecutablePath + "resources/audio/breakout.mp3", 0);
 
@@ -162,6 +166,8 @@ int main(int argc, char* argv[])
             framesPerSecond = std::to_string(static_cast<int>(1.0f / deltaTime));
             lastShownFps = currentFrame;
         }
+
+        cube.Draw(shader, camera);
 
         player->DoCollisions(squares, deltaTime);
 

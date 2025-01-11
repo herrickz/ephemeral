@@ -3,9 +3,11 @@
 #include <GLFW/glfw3.h>
 
 #include <glm/gtc/quaternion.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 #include <ephemeral/objects/Cube.h>
 #include <ephemeral/InputManager.h>
+#include <ephemeral/Settings.h>
 
 const glm::vec3 FORWARD_VECTOR = { -1.0f, 0.0f, 0.0f };
 
@@ -49,7 +51,7 @@ Cube::Cube(
     InitializeData();
 }
 
-void Cube::Draw(const Shader &shader) {
+void Cube::Draw(const Shader &shader, Camera &camera) {
 
     glm::mat4 model = glm::mat4(1.0f);
     glm::mat4 view;
@@ -97,13 +99,13 @@ void Cube::Draw(const Shader &shader) {
 
     SetRotation(finalRotation);
 
-    glm::mat4 translationMatrix = glm::translate(glm::mat4(1.0f), position);
+    glm::mat4 translationMatrix = glm::translate(glm::mat4(1.0f), GetPosition());
     glm::mat4 scaleMatrix = glm::scale(glm::mat4(1.0f), scale);
 
     glm::mat4 modelMatrix = translationMatrix * rotationMatrix * scaleMatrix;
 
     view  = camera.GetViewMatrix();
-    glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)screenWidth / (float)screenHeight, 0.1f, 100.0f);
+    glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
 
     int modelLocation = glGetUniformLocation(shader.GetShaderProgramId(), "model");
     glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(modelMatrix));

@@ -4,6 +4,7 @@
 
 #include <ephemeral/objects/GameObject.h>
 #include <ephemeral/Shader.h>
+#include <ephemeral/Camera.h>
 
 class Cube : public GameObject {
 
@@ -21,7 +22,7 @@ public:
         glm::vec4 sideSixColor
     );
 
-    void Draw(const Shader &shader);
+    void Draw(const Shader &shader, Camera &camera);
 
 private:
     
