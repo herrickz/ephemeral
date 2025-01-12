@@ -17,7 +17,7 @@ public:
     );
     ~Shader();
 
-    void Use();
+    void Use() const;
 
     uint32_t GetShaderProgramId() const;
 

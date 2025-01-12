@@ -11,7 +11,7 @@ TextRender::TextRender(const std::string &fontPath):
     mShader("resources/shaders/text.vs", "resources/shaders/text.fs")
     {
 
-    glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(SCR_WIDTH), 0.0f, static_cast<float>(SCR_HEIGHT));
+    glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(Settings::SCR_WIDTH), 0.0f, static_cast<float>(Settings::SCR_HEIGHT));
     mShader.Use();
     glUniformMatrix4fv(glGetUniformLocation(mShader.GetShaderProgramId(), "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 

@@ -24,6 +24,8 @@ public:
 
     void Draw(const Shader &shader, Camera &camera);
 
+    glm::vec3 GetFrontFacePosition();
+
 private:
     
     void InitializeData();

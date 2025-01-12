@@ -21,7 +21,7 @@ const float ZOOM        =  45.0f;
 
 const float CAMERA_INITIAL_X = 0.0f;
 const float CAMERA_INITIAL_Y = 0.0f;
-const float CAMERA_INITIAL_Z = 10.0f;
+const float CAMERA_INITIAL_Z = 40.0f;
 
 
 // An abstract camera class that processes input and calculates the corresponding Euler Angles, Vectors and Matrices for use in OpenGL

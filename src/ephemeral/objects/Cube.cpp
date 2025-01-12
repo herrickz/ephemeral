@@ -8,14 +8,22 @@
 #include <ephemeral/objects/Cube.h>
 #include <ephemeral/InputManager.h>
 #include <ephemeral/Settings.h>
+#include <ephemeral/Logger.h>
 
-const glm::vec3 FORWARD_VECTOR = { -1.0f, 0.0f, 0.0f };
+const glm::vec3 FORWARD_VECTOR = { 0.0f, 0.0f, 1.0f };
 
 Cube::Cube(glm::vec3 initialPosition, glm::vec4 color):
     GameObject::GameObject(initialPosition, FORWARD_VECTOR) {
 
     mSideColors.push_back(color);
     InitializeData();
+}
+
+glm::vec3 Cube::GetFrontFacePosition() {
+
+    glm::vec3 cubeOffset = { 0.5f, 0.5f, 0.5f };
+
+    return GetPosition() - cubeOffset;
 }
 
 void Cube::InitializeData() {
@@ -56,16 +64,12 @@ void Cube::Draw(const Shader &shader, Camera &camera) {
     glm::mat4 model = glm::mat4(1.0f);
     glm::mat4 view;
 
-    // float currentTime = glfwGetTime();
-    // deltaTime = currentTime - lastTime;
-    // lastTime = currentTime;
-
     glm::vec3 scale = glm::vec3(1.0f, 1.0f, 1.0f);
 
-    glm::vec3 actualCubePosition = { -0.1f, -0.1f, 0.0f };
-    glm::vec3 normalizedDirectionVector = glm::normalize(InputManager::normalizedMousePosition - actualCubePosition);
+    glm::vec3 frontFacePosition = GetPosition();
+    glm::vec3 normalizedDirectionVector = glm::normalize(InputManager::normalizedMousePosition - frontFacePosition);
     glm::vec3 rotationVector = glm::cross(GetForwardVector(), normalizedDirectionVector);
-
+    
     glm::quat result;
 
     rotationVector = glm::normalize(rotationVector);
@@ -80,32 +84,34 @@ void Cube::Draw(const Shader &shader, Camera &camera) {
                     scaledRotationVector.y,
                     scaledRotationVector.z);
 
-    // LOG_I("Quaternion: %f,%f,%f,%f",
-    //     result.x,
-    //     result.y,
-    //     result.z,
-    //     result.w
-    // );
+    glm::vec3 cameraPosition = camera.GetPosition();
+    glm::vec3 cubePosition = GetPosition();
 
     glm::quat finalRotation;
 
     if ( !InputManager::firstMouse ) {
-        finalRotation = glm::slerp(GetRotation(), result, 0.005f);
+        finalRotation = glm::slerp(GetRotation(), result, 0.5f);
     } else {
         finalRotation = GetRotation();
     }
 
-    glm::mat4 rotationMatrix = glm::mat4_cast(finalRotation); // Alternative to glm::toMat4
+    glm::mat4 rotationMatrix = glm::mat4_cast(finalRotation);
 
     SetRotation(finalRotation);
 
-    glm::mat4 translationMatrix = glm::translate(glm::mat4(1.0f), GetPosition());
+    glm::vec3 cubeOffset = { 0.5f, 0.5f, 0.5f };
+
+    glm::mat4 translationMatrix = glm::translate(glm::mat4(1.0f), GetPosition() - cubeOffset);
     glm::mat4 scaleMatrix = glm::scale(glm::mat4(1.0f), scale);
 
     glm::mat4 modelMatrix = translationMatrix * rotationMatrix * scaleMatrix;
 
     view  = camera.GetViewMatrix();
-    glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+    glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)Settings::SCR_WIDTH / (float)Settings::SCR_HEIGHT, 0.1f, 100.0f);
+
+    glBindVertexArray(mVAO);
+
+    shader.Use();
 
     int modelLocation = glGetUniformLocation(shader.GetShaderProgramId(), "model");
     glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(modelMatrix));
@@ -136,4 +142,5 @@ void Cube::Draw(const Shader &shader, Camera &camera) {
     glUniform4f(colorLocation, 0.5f, 0.5f, 1.0f, 1.0f);
     glDrawArrays(GL_TRIANGLES, 30, 6);
 
+    glBindVertexArray(0);
 }
