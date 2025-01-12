@@ -120,7 +120,7 @@ int main(int argc, char* argv[])
 
     Cube cube({ 0.0f, 0.0f, -5.0f }, { 0.5f, 0.5f, 0.5f, 1.0f });
 
-    // AudioManager::GetInstance().Play(baseExecutablePath + "resources/audio/breakout.mp3", 0);
+    AudioManager::GetInstance().Play(baseExecutablePath + "resources/audio/breakout.mp3", 0);
 
     if(!levelLoader.Load(player, squares, camera)) {
         LOG_F("Could not load level");
