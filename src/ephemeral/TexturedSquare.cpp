@@ -43,14 +43,14 @@ void TexturedSquare::SetPosition(glm::vec3 position) {
 void TexturedSquare::Draw(Shader &shader, Texture &texture) {
 
     shader.Use();
-
+    
     glm::mat4 model = glm::mat4(1.0f);
     glm::mat4 view;
 
     model = glm::translate(model, mPosition);
 
     view  = mCamera.GetViewMatrix();
-    glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+    glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)Settings::SCR_WIDTH / (float)Settings::SCR_HEIGHT, 0.1f, 100.0f);
 
     int modelLocation = glGetUniformLocation(shader.GetShaderProgramId(), "model");
     glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(model));
@@ -64,6 +64,8 @@ void TexturedSquare::Draw(Shader &shader, Texture &texture) {
     texture.Use();
 
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+    glBindVertexArray(0);
 }
 
 glm::vec3 TexturedSquare::GetPosition() const {

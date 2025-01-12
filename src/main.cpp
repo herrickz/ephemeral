@@ -12,6 +12,9 @@
 #include <ephemeral/GameManager.h>
 #include <ephemeral/AudioManager.h>
 #include <ephemeral/Logger.h>
+#include <ephemeral/InputManager.h>
+#include <ephemeral/objects/Cube.h>
+#include <ephemeral/Settings.h>
 
 #include <iostream>
 #include <memory>
@@ -30,14 +33,23 @@ std::ostream& operator<< (std::ostream& stream, const TexturedSquare& square) {
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow *window);
 void drawLines(glm::vec3 squarePosition, Shader &lineShader);
+void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 
 Camera camera;
 std::unique_ptr<Player> player(std::make_unique<Player>(camera));
 
 float deltaTime = 0.0f;
 
-int main()
-{
+int main(int argc, char* argv[])
+{   
+    std::string baseExecutablePath = "";
+
+    if (argc == 2) {
+        baseExecutablePath = argv[1];
+        baseExecutablePath += "/";
+    }
+
+    LOG_I("Base executable path: %s", baseExecutablePath.c_str());
 
     // glfw: initialize and configure
     // ------------------------------
@@ -50,7 +62,7 @@ int main()
 
     // glfw window creation
     // --------------------
-    GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "LearnOpenGL", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(Settings::SCR_WIDTH, Settings::SCR_HEIGHT, "LearnOpenGL", NULL, NULL);
     if (window == NULL)
     {
         LOG_F("Failed to create GLFW window");
@@ -59,6 +71,7 @@ int main()
     }
     glfwMakeContextCurrent(window);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+    glfwSetCursorPosCallback(window, mouse_callback);
 
     // glad: load all OpenGL function pointers
     // ---------------------------------------
@@ -69,16 +82,18 @@ int main()
     }
 
     // Initialize all textures
-    Texture brickTexture("resources/textures/bricks2.jpg");
-    Texture playerTexture("resources/textures/matrix.jpg");
-    Texture coinTexture("resources/textures/awesomeface.png");
-    Texture enemyTexture("resources/textures/enemy.png");
+    Texture brickTexture(baseExecutablePath + "resources/textures/bricks2.jpg");
+    Texture playerTexture(baseExecutablePath + "resources/textures/matrix.jpg");
+    Texture coinTexture(baseExecutablePath + "resources/textures/awesomeface.png");
+    Texture enemyTexture(baseExecutablePath + "resources/textures/enemy.png");
 
-    TextRender textRender("resources/fonts/Antonio-Regular.ttf");
+    TextRender textRender(baseExecutablePath + "resources/fonts/Antonio-Regular.ttf");
 
     // Initialize all shaders
-    Shader texturedShader("resources/shaders/shader.vs", "resources/shaders/shader.fs");
-    Shader lineShader("resources/shaders/line.vs", "resources/shaders/line.fs");
+    Shader texturedShader(baseExecutablePath + "resources/shaders/shader.vs", baseExecutablePath + "resources/shaders/shader.fs");
+    Shader regularShader(baseExecutablePath + "resources/shaders/shader.vs", baseExecutablePath + "resources/shaders/shader.fs");
+    Shader lineShader(baseExecutablePath + "resources/shaders/line.vs", baseExecutablePath + "resources/shaders/line.fs");
+    Shader colorShader(baseExecutablePath + "resources/shaders/color.vs", baseExecutablePath + "resources/shaders/color.fs");
 
     // Create all the squares using a cube position vector
     std::vector<std::unique_ptr<TexturedSquare>> squares;
@@ -86,7 +101,26 @@ int main()
 
     LevelLoader levelLoader;
 
-    AudioManager::GetInstance().Play("resources/audio/breakout.mp3", 0);
+    std::vector<std::unique_ptr<Cube>> cubes;
+
+    const float widthApart = 1.5;
+
+    for(int i = 0; i < 20; i++) {
+        for (int j = 0; j < 20; j++) {
+
+            float xPosition = i * widthApart - 15;
+            float yPosition = j * widthApart - 15   ;
+
+            glm::vec3 position = { xPosition, yPosition, -5.0f };
+            glm::vec4 color = { 0.5f, 0.5f, 0.5f, 1.0f };
+
+            cubes.push_back(std::make_unique<Cube>(position, color));
+        }
+    }
+
+    Cube cube({ 0.0f, 0.0f, -5.0f }, { 0.5f, 0.5f, 0.5f, 1.0f });
+
+    AudioManager::GetInstance().Play(baseExecutablePath + "resources/audio/breakout.mp3", 0);
 
     if(!levelLoader.Load(player, squares, camera)) {
         LOG_F("Could not load level");
@@ -101,8 +135,13 @@ int main()
     glEnable(GL_MULTISAMPLE);
 
     std::string framesPerSecond = "";
-    glm::vec3 squarePosition = squares[0]->GetPosition();
 
+    glm::vec3 squarePosition = { 0.0, 0.0, 0.0 };
+    
+    if (squares.size() > 0) {
+        squarePosition = squares[0]->GetPosition();
+    }
+    
     float lastShownFps = 0.0f;
     float lastFrameTime = glfwGetTime();
 
@@ -120,34 +159,51 @@ int main()
         snprintf(currentFrameCharBuffer, 100, "%.1f", currentFrame);
         std::string temp(currentFrameCharBuffer);
 
-        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        drawLines(squarePosition, lineShader);
+        // drawLines(squarePosition, lineShader);
 
-        for(const auto &square : squares) {
-            if(square->GetSpriteType() == SpriteType::COIN) {
-                square->Draw(texturedShader, coinTexture);
-            } else if(square->GetSpriteType() == SpriteType::BRICK) {
-                square->Draw(texturedShader, brickTexture);
-            } else if(square->GetSpriteType() == SpriteType::ENEMY) {
-                square->Draw(texturedShader, enemyTexture);
-                square->OnUpdate(deltaTime);
-            }
-        }
+        // for(const auto &square : squares) {
+        //     if(square->GetSpriteType() == SpriteType::COIN) {
+        //         square->Draw(texturedShader, coinTexture);
+        //     } else if(square->GetSpriteType() == SpriteType::BRICK) {
+        //         square->Draw(texturedShader, brickTexture);
+        //     } else if(square->GetSpriteType() == SpriteType::ENEMY) {
+        //         square->Draw(texturedShader, enemyTexture);
+        //         square->OnUpdate(deltaTime);
+        //     }
+        // }
 
-        player->OnUpdate(deltaTime);
-        player->Draw(texturedShader, playerTexture);
+        // player->OnUpdate(deltaTime);
+        // player->Draw(texturedShader, playerTexture);
 
-        textRender.Render(framesPerSecond, SCR_WIDTH * 0.03, SCR_HEIGHT * 0.9, 1.0f, glm::vec3(0.5, 0.8f, 0.2f));
-        textRender.Render("Coins: " + std::to_string(GameManager::GetInstance().GetCoinCount()), SCR_WIDTH * 0.03, SCR_HEIGHT * 0.1, 1.0f, glm::vec3(0.5, 0.8f, 0.2f));
+        textRender.Render(framesPerSecond, Settings::SCR_WIDTH * 0.03, Settings::SCR_HEIGHT * 0.9, 1.0f, glm::vec3(0.5, 0.8f, 0.2f));
+        // textRender.Render("Coins: " + std::to_string(GameManager::GetInstance().GetCoinCount()), SCR_WIDTH * 0.03, SCR_HEIGHT * 0.1, 1.0f, glm::vec3(0.5, 0.8f, 0.2f));
 
         if(lastShownFps < (currentFrame - 0.5f)) {
             framesPerSecond = std::to_string(static_cast<int>(1.0f / deltaTime));
             lastShownFps = currentFrame;
         }
 
-        player->DoCollisions(squares, deltaTime);
+        for(auto &cube : cubes) {
+            cube->Draw(colorShader, camera);
+        }
+
+        // cube.Draw
+
+        // glm::vec4 color = { 0.0f, 1.0f, 1.0f, 1.0f };
+
+        // StaticLine line1(
+        //     cube.GetFrontFacePosition(),
+        //     InputManager::normalizedMousePosition,
+        //     color,
+        //     camera
+        // );
+
+        // line1.Draw(lineShader);
+
+        // player->DoCollisions(squares, deltaTime);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
@@ -210,6 +266,12 @@ void drawLines(glm::vec3 squarePosition, Shader &lineShader) {
     line4.Draw(lineShader);
 }
 
+void mouse_callback(GLFWwindow* window, double xPosition, double yPosition) {
+
+    InputManager::SetMouse(xPosition, yPosition);
+    
+}
+
 // process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
 // ---------------------------------------------------------------------------------------------------------
 void processInput(GLFWwindow *window)
@@ -225,17 +287,19 @@ void processInput(GLFWwindow *window)
         player->ProcessKeyboard(1, deltaTime);
     }
 
-    if(glfwGetKey(window, GLFW_KEY_SPACE)) {
-        player->OnJump();
-    }
+    // if(glfwGetKey(window, GLFW_KEY_SPACE)) {
+    //     player->OnJump();
+    // }
 }
 
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes
 // ---------------------------------------------------------------------------------------------
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
-    printf("Resize: %d, %d\n", width, height);
     // make sure the viewport matches the new window dimensions; note that width and
     // height will be significantly larger than specified on retina displays.
     glViewport(0, 0, width, height);
+
+    Settings::SCR_HEIGHT = height;
+    Settings::SCR_WIDTH = width;
 }

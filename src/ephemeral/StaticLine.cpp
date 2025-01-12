@@ -32,7 +32,7 @@ void StaticLine::Draw(Shader &shader) {
     glm::mat4 model = glm::mat4(1.0f);
 
     glm::mat4 view  = mCamera.GetViewMatrix();
-    glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+    glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)Settings::SCR_WIDTH / (float)Settings::SCR_HEIGHT, 0.1f, 100.0f);
 
     shader.Use();
 

@@ -86,10 +86,10 @@ Shader::~Shader() {
     glDeleteProgram(mShaderProgramId);
 }
 
-void Shader::Use() {
+void Shader::Use() const{
     glUseProgram(mShaderProgramId);
 }
 
-uint32_t Shader::GetShaderProgramId() {
+uint32_t Shader::GetShaderProgramId() const {
     return mShaderProgramId;
 }
