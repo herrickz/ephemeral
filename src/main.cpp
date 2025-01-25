@@ -41,7 +41,7 @@ std::unique_ptr<Player> player(std::make_unique<Player>(camera));
 float deltaTime = 0.0f;
 
 int main(int argc, char* argv[])
-{   
+{
     std::string baseExecutablePath = "";
 
     if (argc == 2) {
@@ -72,6 +72,7 @@ int main(int argc, char* argv[])
     glfwMakeContextCurrent(window);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
     glfwSetCursorPosCallback(window, mouse_callback);
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     // glad: load all OpenGL function pointers
     // ---------------------------------------
@@ -137,11 +138,11 @@ int main(int argc, char* argv[])
     std::string framesPerSecond = "";
 
     glm::vec3 squarePosition = { 0.0, 0.0, 0.0 };
-    
+
     if (squares.size() > 0) {
         squarePosition = squares[0]->GetPosition();
     }
-    
+
     float lastShownFps = 0.0f;
     float lastFrameTime = glfwGetTime();
 
@@ -162,24 +163,24 @@ int main(int argc, char* argv[])
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        // drawLines(squarePosition, lineShader);
+        drawLines(squarePosition, lineShader);
 
-        // for(const auto &square : squares) {
-        //     if(square->GetSpriteType() == SpriteType::COIN) {
-        //         square->Draw(texturedShader, coinTexture);
-        //     } else if(square->GetSpriteType() == SpriteType::BRICK) {
-        //         square->Draw(texturedShader, brickTexture);
-        //     } else if(square->GetSpriteType() == SpriteType::ENEMY) {
-        //         square->Draw(texturedShader, enemyTexture);
-        //         square->OnUpdate(deltaTime);
-        //     }
-        // }
+        for(const auto &square : squares) {
+            if(square->GetSpriteType() == SpriteType::COIN) {
+                square->Draw(texturedShader, coinTexture);
+            } else if(square->GetSpriteType() == SpriteType::BRICK) {
+                square->Draw(texturedShader, brickTexture);
+            } else if(square->GetSpriteType() == SpriteType::ENEMY) {
+                square->Draw(texturedShader, enemyTexture);
+                square->OnUpdate(deltaTime);
+            }
+        }
 
-        // player->OnUpdate(deltaTime);
-        // player->Draw(texturedShader, playerTexture);
+        player->OnUpdate(deltaTime);
+        player->Draw(texturedShader, playerTexture);
 
         textRender.Render(framesPerSecond, Settings::SCR_WIDTH * 0.03, Settings::SCR_HEIGHT * 0.9, 1.0f, glm::vec3(0.5, 0.8f, 0.2f));
-        // textRender.Render("Coins: " + std::to_string(GameManager::GetInstance().GetCoinCount()), SCR_WIDTH * 0.03, SCR_HEIGHT * 0.1, 1.0f, glm::vec3(0.5, 0.8f, 0.2f));
+        textRender.Render("Coins: " + std::to_string(GameManager::GetInstance().GetCoinCount()), Settings::SCR_WIDTH * 0.03, Settings::SCR_HEIGHT * 0.1, 1.0f, glm::vec3(0.5, 0.8f, 0.2f));
 
         if(lastShownFps < (currentFrame - 0.5f)) {
             framesPerSecond = std::to_string(static_cast<int>(1.0f / deltaTime));
@@ -190,20 +191,7 @@ int main(int argc, char* argv[])
             cube->Draw(colorShader, camera);
         }
 
-        // cube.Draw
-
-        // glm::vec4 color = { 0.0f, 1.0f, 1.0f, 1.0f };
-
-        // StaticLine line1(
-        //     cube.GetFrontFacePosition(),
-        //     InputManager::normalizedMousePosition,
-        //     color,
-        //     camera
-        // );
-
-        // line1.Draw(lineShader);
-
-        // player->DoCollisions(squares, deltaTime);
+        player->DoCollisions(squares, deltaTime);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
@@ -269,7 +257,7 @@ void drawLines(glm::vec3 squarePosition, Shader &lineShader) {
 void mouse_callback(GLFWwindow* window, double xPosition, double yPosition) {
 
     InputManager::SetMouse(xPosition, yPosition);
-    
+
 }
 
 // process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
@@ -287,9 +275,9 @@ void processInput(GLFWwindow *window)
         player->ProcessKeyboard(1, deltaTime);
     }
 
-    // if(glfwGetKey(window, GLFW_KEY_SPACE)) {
-    //     player->OnJump();
-    // }
+    if(glfwGetKey(window, GLFW_KEY_SPACE)) {
+        player->OnJump();
+    }
 }
 
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes

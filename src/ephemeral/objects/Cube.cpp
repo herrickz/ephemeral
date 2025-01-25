@@ -39,14 +39,14 @@ void Cube::InitializeData() {
 }
 
 Cube::Cube(
-        glm::vec3 initialPosition, 
+        glm::vec3 initialPosition,
         glm::vec4 sideOneColor,
         glm::vec4 sideTwoColor,
         glm::vec4 sideThreeColor,
         glm::vec4 sideFourColor,
         glm::vec4 sideFiveColor,
         glm::vec4 sideSixColor
-): 
+):
     GameObject::GameObject(initialPosition, FORWARD_VECTOR) {
 
     mSideColors.push_back(sideOneColor);
@@ -69,7 +69,7 @@ void Cube::Draw(const Shader &shader, Camera &camera) {
     glm::vec3 frontFacePosition = GetPosition();
     glm::vec3 normalizedDirectionVector = glm::normalize(InputManager::normalizedMousePosition - frontFacePosition);
     glm::vec3 rotationVector = glm::cross(GetForwardVector(), normalizedDirectionVector);
-    
+
     glm::quat result;
 
     rotationVector = glm::normalize(rotationVector);

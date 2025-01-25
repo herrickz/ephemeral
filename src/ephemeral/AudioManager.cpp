@@ -151,7 +151,8 @@ void PlayAudio(RtAudio &audio) {
         // Run the audio stream and only break out when someone
         // invokes StopAllAudio()
         while (!AudioManager::GetInstance().ShouldStopAllAudio()) {
-
+            using namespace std::chrono_literals;
+            std::this_thread::sleep_for(100ms);
         }
 
         // Clean up audio stream

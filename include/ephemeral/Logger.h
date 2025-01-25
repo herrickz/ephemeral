@@ -1,6 +1,8 @@
 
 #pragma once
 
+#include <iostream>
+
 #define FILENAME_ONLY (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : (strrchr(__FILE__, '\\') ? strrchr(__FILE__, '\\') + 1 : __FILE__))
 
 #define LOG_I(formatString, ...) \
